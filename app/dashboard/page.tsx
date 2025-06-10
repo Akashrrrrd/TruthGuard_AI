@@ -88,7 +88,7 @@ export default function DashboardPage() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="bias-analysis">Bias Analysis</TabsTrigger>
             <TabsTrigger value="sources">Sources</TabsTrigger>
-            <TabsTrigger value="real-time">Real-time</TabsTrigger>
+            <TabsTrigger value="real-time">Status</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">

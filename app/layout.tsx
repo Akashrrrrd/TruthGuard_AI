@@ -10,9 +10,12 @@ import { Suspense } from "react"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "TruthGuard - AI-Powered Media Bias Detection",
+  title: "TruthGuard",
   description: "Real-time media bias and misinformation detection using MongoDB and Google AI",
-    generator: 'v0.dev'
+    generator: 'v0.dev',
+    icons: {
+      icon: '/top.ico',
+    },
 }
 
 export default function RootLayout({
