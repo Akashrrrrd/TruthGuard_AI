@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import * as d3 from "d3"
+import * as d3 from 'd3';
+import { sankey as d3Sankey, sankeyLinkHorizontal } from 'd3-sankey';
 
 interface Node {
   id: string
@@ -19,7 +20,7 @@ interface Graph {
   links: Link[]
 }
 
-// Sample data for narrative flow
+// Fixed data with no circular dependencies
 const data: Graph = {
   nodes: [
     { id: "Initial Report", group: 1 },
@@ -36,25 +37,39 @@ const data: Graph = {
     { id: "Future Implications", group: 2 },
   ],
   links: [
+    // Stage 1: Initial triggers
     { source: "Initial Report", target: "Economic Impact", value: 5 },
     { source: "Initial Report", target: "Political Response", value: 8 },
     { source: "Initial Report", target: "Public Reaction", value: 6 },
+    
+    // Stage 2: Economic flow
     { source: "Economic Impact", target: "Market Response", value: 7 },
     { source: "Economic Impact", target: "Expert Analysis", value: 4 },
+    
+    // Stage 3: Political flow
     { source: "Political Response", target: "Policy Proposal", value: 6 },
     { source: "Political Response", target: "Opposition View", value: 5 },
+    
+    // Stage 4: Public reaction flow
     { source: "Public Reaction", target: "Social Media", value: 9 },
-    { source: "Expert Analysis", target: "Future Implications", value: 5 },
+    
+    // Stage 5: Analysis and context
     { source: "Expert Analysis", target: "Historical Context", value: 4 },
+    { source: "Expert Analysis", target: "Future Implications", value: 5 },
+    
+    // Stage 6: Policy outcomes
     { source: "Policy Proposal", target: "Future Implications", value: 3 },
     { source: "Policy Proposal", target: "International Perspective", value: 2 },
-    { source: "Opposition View", target: "Public Reaction", value: 4 },
-    { source: "Social Media", target: "Opposition View", value: 3 },
+    
+    // Stage 7: Market outcomes
     { source: "Market Response", target: "Future Implications", value: 4 },
+    
+    // Stage 8: Social influence (no circular dependency)
+    { source: "Social Media", target: "Opposition View", value: 3 },
   ],
 }
 
-export function NarrativeFlow() {
+export  function NarrativeFlow() {
   const svgRef = useRef<SVGSVGElement>(null)
 
   useEffect(() => {
@@ -73,8 +88,7 @@ export function NarrativeFlow() {
       .attr("height", "100%")
 
     // Create a Sankey diagram
-    const sankey = d3
-      .sankey()
+    const sankeyGenerator = d3Sankey()
       .nodeId((d: any) => d.id)
       .nodeWidth(15)
       .nodePadding(10)
@@ -84,7 +98,7 @@ export function NarrativeFlow() {
       ])
 
     // Format the data for Sankey
-    const sankeyData = sankey({
+    const sankeyData = sankeyGenerator({
       nodes: data.nodes.map((d) => Object.assign({}, d)),
       links: data.links.map((d) => Object.assign({}, d)),
     })
@@ -93,22 +107,28 @@ export function NarrativeFlow() {
     const color = d3.scaleOrdinal(d3.schemeCategory10)
 
     // Add links
-    const link = svg
+    svg
       .append("g")
       .selectAll("path")
       .data(sankeyData.links)
       .enter()
       .append("path")
-      .attr("d", d3.sankeyLinkHorizontal())
+      .attr("d", sankeyLinkHorizontal())
       .attr("stroke", (d: any) => color(d.source.group.toString()))
       .attr("stroke-width", (d: any) => Math.max(1, d.width))
       .attr("stroke-opacity", 0.5)
       .attr("fill", "none")
+      .on("mouseover", function(event, d: any) {
+        d3.select(this).attr("stroke-opacity", 0.8)
+      })
+      .on("mouseout", function(event, d: any) {
+        d3.select(this).attr("stroke-opacity", 0.5)
+      })
       .append("title")
       .text((d: any) => `${d.source.id} → ${d.target.id}\nValue: ${d.value}`)
 
     // Add nodes
-    const node = svg
+    svg
       .append("g")
       .selectAll("rect")
       .data(sankeyData.nodes)
@@ -120,11 +140,18 @@ export function NarrativeFlow() {
       .attr("width", (d: any) => d.x1 - d.x0)
       .attr("fill", (d: any) => color(d.group.toString()))
       .attr("stroke", "#000")
+      .attr("stroke-width", 0.5)
+      .on("mouseover", function(event, d: any) {
+        d3.select(this).attr("stroke-width", 2)
+      })
+      .on("mouseout", function(event, d: any) {
+        d3.select(this).attr("stroke-width", 0.5)
+      })
       .append("title")
       .text((d: any) => `${d.id}\nValue: ${d.value}`)
 
     // Add node labels
-    const nodeText = svg
+    svg
       .append("g")
       .selectAll("text")
       .data(sankeyData.nodes)
@@ -135,8 +162,9 @@ export function NarrativeFlow() {
       .attr("dy", "0.35em")
       .attr("text-anchor", (d: any) => (d.x0 < width / 2 ? "start" : "end"))
       .text((d: any) => d.id)
-      .attr("font-size", "10px")
+      .attr("font-size", "12px")
       .attr("font-weight", "bold")
+      .attr("fill", "#333")
 
     return () => {
       // Cleanup
@@ -144,7 +172,11 @@ export function NarrativeFlow() {
   }, [])
 
   return (
-    <div className="w-full h-[600px] overflow-hidden">
+    <div className="w-full h-[600px] overflow-hidden bg-white rounded-lg shadow-lg">
+      <div className="p-4 border-b">
+        <h2 className="text-xl font-bold text-gray-800">Narrative Flow Analysis</h2>
+        <p className="text-sm text-gray-600">Information flow from initial report to various outcomes</p>
+      </div>
       <svg ref={svgRef} className="w-full h-full"></svg>
     </div>
   )
