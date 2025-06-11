@@ -1,4 +1,4 @@
-'use client'
+'use server'
 import { type NextRequest, NextResponse } from "next/server"
 import { MongoClient, ServerApiVersion } from "mongodb"
 

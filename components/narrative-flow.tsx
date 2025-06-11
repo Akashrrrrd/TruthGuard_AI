@@ -20,63 +20,64 @@ interface Graph {
   links: Link[]
 }
 
-// Fixed data with no circular dependencies
+// Improved data structure with better logical flow and balanced values
 const data: Graph = {
   nodes: [
-    { id: "Initial Report", group: 1 },
-    { id: "Economic Impact", group: 2 },
-    { id: "Political Response", group: 3 },
-    { id: "Public Reaction", group: 4 },
-    { id: "Expert Analysis", group: 5 },
-    { id: "Policy Proposal", group: 3 },
-    { id: "Market Response", group: 2 },
-    { id: "Social Media", group: 4 },
-    { id: "Opposition View", group: 3 },
-    { id: "International Perspective", group: 6 },
-    { id: "Historical Context", group: 5 },
-    { id: "Future Implications", group: 2 },
+    // Stage 1 - Initial
+    { id: "Breaking News", group: 1 },
+    
+    // Stage 2 - Primary Reactions
+    { id: "Media Coverage", group: 2 },
+    { id: "Government Response", group: 2 },
+    { id: "Public Awareness", group: 2 },
+    
+    // Stage 3 - Detailed Analysis
+    { id: "Expert Commentary", group: 3 },
+    { id: "Economic Analysis", group: 3 },
+    { id: "Political Debate", group: 3 },
+    
+    // Stage 4 - Outcomes
+    { id: "Policy Changes", group: 4 },
+    { id: "Market Impact", group: 4 },
+    { id: "Public Opinion", group: 4 },
+    
+    // Stage 5 - Final Impact
+    { id: "Long-term Effects", group: 5 },
   ],
   links: [
-    // Stage 1: Initial triggers
-    { source: "Initial Report", target: "Economic Impact", value: 5 },
-    { source: "Initial Report", target: "Political Response", value: 8 },
-    { source: "Initial Report", target: "Public Reaction", value: 6 },
+    // Stage 1 → Stage 2: Initial story breaks
+    { source: "Breaking News", target: "Media Coverage", value: 40 },
+    { source: "Breaking News", target: "Government Response", value: 30 },
+    { source: "Breaking News", target: "Public Awareness", value: 35 },
     
-    // Stage 2: Economic flow
-    { source: "Economic Impact", target: "Market Response", value: 7 },
-    { source: "Economic Impact", target: "Expert Analysis", value: 4 },
+    // Stage 2 → Stage 3: Deeper analysis begins
+    { source: "Media Coverage", target: "Expert Commentary", value: 25 },
+    { source: "Media Coverage", target: "Economic Analysis", value: 15 },
+    { source: "Government Response", target: "Political Debate", value: 20 },
+    { source: "Public Awareness", target: "Expert Commentary", value: 20 },
+    { source: "Public Awareness", target: "Political Debate", value: 15 },
     
-    // Stage 3: Political flow
-    { source: "Political Response", target: "Policy Proposal", value: 6 },
-    { source: "Political Response", target: "Opposition View", value: 5 },
+    // Stage 3 → Stage 4: Analysis leads to outcomes
+    { source: "Expert Commentary", target: "Public Opinion", value: 30 },
+    { source: "Economic Analysis", target: "Market Impact", value: 15 },
+    { source: "Political Debate", target: "Policy Changes", value: 25 },
     
-    // Stage 4: Public reaction flow
-    { source: "Public Reaction", target: "Social Media", value: 9 },
-    
-    // Stage 5: Analysis and context
-    { source: "Expert Analysis", target: "Historical Context", value: 4 },
-    { source: "Expert Analysis", target: "Future Implications", value: 5 },
-    
-    // Stage 6: Policy outcomes
-    { source: "Policy Proposal", target: "Future Implications", value: 3 },
-    { source: "Policy Proposal", target: "International Perspective", value: 2 },
-    
-    // Stage 7: Market outcomes
-    { source: "Market Response", target: "Future Implications", value: 4 },
-    
-    // Stage 8: Social influence (no circular dependency)
-    { source: "Social Media", target: "Opposition View", value: 3 },
+    // Stage 4 → Stage 5: Final consolidation
+    { source: "Policy Changes", target: "Long-term Effects", value: 25 },
+    { source: "Market Impact", target: "Long-term Effects", value: 15 },
+    { source: "Public Opinion", target: "Long-term Effects", value: 30 },
   ],
 }
 
-export  function NarrativeFlow() {
+export default function ImprovedNarrativeFlow() {
   const svgRef = useRef<SVGSVGElement>(null)
 
   useEffect(() => {
     if (!svgRef.current) return
 
-    const width = 800
-    const height = 600
+    const width = 900
+    const height = 500
+    const margin = { top: 20, right: 150, bottom: 20, left: 150 }
 
     // Clear any existing SVG content
     d3.select(svgRef.current).selectAll("*").remove()
@@ -87,14 +88,14 @@ export  function NarrativeFlow() {
       .attr("width", "100%")
       .attr("height", "100%")
 
-    // Create a Sankey diagram
+    // Create a Sankey diagram with better spacing
     const sankeyGenerator = d3Sankey()
       .nodeId((d: any) => d.id)
-      .nodeWidth(15)
-      .nodePadding(10)
+      .nodeWidth(20)
+      .nodePadding(15)
       .extent([
-        [1, 1],
-        [width - 1, height - 5],
+        [margin.left, margin.top],
+        [width - margin.right, height - margin.bottom],
       ])
 
     // Format the data for Sankey
@@ -103,10 +104,38 @@ export  function NarrativeFlow() {
       links: data.links.map((d) => Object.assign({}, d)),
     })
 
-    // Color scale for different groups
-    const color = d3.scaleOrdinal(d3.schemeCategory10)
+    // Better color scheme for different stages
+    const stageColors = {
+      1: "#1f77b4", // Blue - Initial
+      2: "#ff7f0e", // Orange - Primary reactions
+      3: "#2ca02c", // Green - Analysis
+      4: "#d62728", // Red - Outcomes
+      5: "#9467bd"  // Purple - Final impact
+    }
 
-    // Add links
+    // Add gradient definitions for links
+    const defs = svg.append("defs")
+    
+    sankeyData.links.forEach((link: any, i: number) => {
+      const gradientId = `gradient-${i}`
+      const gradient = defs.append("linearGradient")
+        .attr("id", gradientId)
+        .attr("gradientUnits", "userSpaceOnUse")
+        .attr("x1", link.source.x1)
+        .attr("x2", link.target.x0)
+      
+      gradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", stageColors[link.source.group])
+        .attr("stop-opacity", 0.6)
+      
+      gradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", stageColors[link.target.group])
+        .attr("stop-opacity", 0.6)
+    })
+
+    // Add links with gradients
     svg
       .append("g")
       .selectAll("path")
@@ -114,20 +143,33 @@ export  function NarrativeFlow() {
       .enter()
       .append("path")
       .attr("d", sankeyLinkHorizontal())
-      .attr("stroke", (d: any) => color(d.source.group.toString()))
-      .attr("stroke-width", (d: any) => Math.max(1, d.width))
-      .attr("stroke-opacity", 0.5)
+      .attr("stroke", (d: any, i: number) => `url(#gradient-${i})`)
+      .attr("stroke-width", (d: any) => Math.max(2, d.width))
       .attr("fill", "none")
+      .attr("opacity", 0.7)
       .on("mouseover", function(event, d: any) {
-        d3.select(this).attr("stroke-opacity", 0.8)
+        d3.select(this).attr("opacity", 1).attr("stroke-width", (d: any) => Math.max(3, d.width + 1))
+        
+        // Show tooltip
+        const tooltip = d3.select("body").append("div")
+          .attr("class", "tooltip")
+          .style("position", "absolute")
+          .style("background", "rgba(0,0,0,0.8)")
+          .style("color", "white")
+          .style("padding", "8px")
+          .style("border-radius", "4px")
+          .style("font-size", "12px")
+          .style("pointer-events", "none")
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 10) + "px")
+          .html(`<strong>${d.source.id}</strong> → <strong>${d.target.id}</strong><br/>Flow strength: ${d.value}`)
       })
       .on("mouseout", function(event, d: any) {
-        d3.select(this).attr("stroke-opacity", 0.5)
+        d3.select(this).attr("opacity", 0.7).attr("stroke-width", (d: any) => Math.max(2, d.width))
+        d3.selectAll(".tooltip").remove()
       })
-      .append("title")
-      .text((d: any) => `${d.source.id} → ${d.target.id}\nValue: ${d.value}`)
 
-    // Add nodes
+    // Add nodes with better styling
     svg
       .append("g")
       .selectAll("rect")
@@ -138,46 +180,92 @@ export  function NarrativeFlow() {
       .attr("y", (d: any) => d.y0)
       .attr("height", (d: any) => d.y1 - d.y0)
       .attr("width", (d: any) => d.x1 - d.x0)
-      .attr("fill", (d: any) => color(d.group.toString()))
-      .attr("stroke", "#000")
-      .attr("stroke-width", 0.5)
+      .attr("fill", (d: any) => stageColors[d.group])
+      .attr("stroke", "#333")
+      .attr("stroke-width", 1)
+      .attr("rx", 3) // Rounded corners
       .on("mouseover", function(event, d: any) {
-        d3.select(this).attr("stroke-width", 2)
+        d3.select(this).attr("stroke-width", 3)
       })
       .on("mouseout", function(event, d: any) {
-        d3.select(this).attr("stroke-width", 0.5)
+        d3.select(this).attr("stroke-width", 1)
       })
-      .append("title")
-      .text((d: any) => `${d.id}\nValue: ${d.value}`)
 
-    // Add node labels
+    // Add node labels with better positioning
     svg
       .append("g")
       .selectAll("text")
       .data(sankeyData.nodes)
       .enter()
       .append("text")
-      .attr("x", (d: any) => (d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6))
+      .attr("x", (d: any) => (d.x0 < width / 2 ? d.x1 + 8 : d.x0 - 8))
       .attr("y", (d: any) => (d.y1 + d.y0) / 2)
       .attr("dy", "0.35em")
       .attr("text-anchor", (d: any) => (d.x0 < width / 2 ? "start" : "end"))
       .text((d: any) => d.id)
-      .attr("font-size", "12px")
-      .attr("font-weight", "bold")
+      .attr("font-size", "13px")
+      .attr("font-weight", "600")
       .attr("fill", "#333")
+      .style("text-shadow", "1px 1px 2px rgba(255,255,255,0.8)") // Better readability
+
+    // Add stage labels
+    const stages = [
+      { x: margin.left + 50, y: margin.top - 5, label: "Initial Event", color: stageColors[1] },
+      { x: width * 0.3, y: margin.top - 5, label: "Primary Reactions", color: stageColors[2] },
+      { x: width * 0.5, y: margin.top - 5, label: "Analysis Phase", color: stageColors[3] },
+      { x: width * 0.7, y: margin.top - 5, label: "Outcomes", color: stageColors[4] },
+      { x: width - margin.right - 50, y: margin.top - 5, label: "Long-term Impact", color: stageColors[5] }
+    ]
+
+    svg.selectAll(".stage-label")
+      .data(stages)
+      .enter()
+      .append("text")
+      .attr("class", "stage-label")
+      .attr("x", d => d.x)
+      .attr("y", d => d.y)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "11px")
+      .attr("font-weight", "bold")
+      .attr("fill", d => d.color)
+      .text(d => d.label)
 
     return () => {
-      // Cleanup
+      d3.selectAll(".tooltip").remove()
     }
   }, [])
 
   return (
-    <div className="w-full h-[600px] overflow-hidden bg-white rounded-lg shadow-lg">
-      <div className="p-4 border-b">
-        <h2 className="text-xl font-bold text-gray-800">Narrative Flow Analysis</h2>
-        <p className="text-sm text-gray-600">Information flow from initial report to various outcomes</p>
+    <div className="w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl shadow-lg overflow-hidden">
+      <div className="p-6 bg-white border-b border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Narrative Flow Analysis</h2>
+        <p className="text-gray-600">Information cascade from breaking news through to long-term societal impact</p>
+        <div className="flex flex-wrap gap-4 mt-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-blue-500 rounded"></div>
+            <span>Initial Event</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-orange-500 rounded"></div>
+            <span>Primary Reactions</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-green-500 rounded"></div>
+            <span>Analysis Phase</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-500 rounded"></div>
+            <span>Outcomes</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-purple-500 rounded"></div>
+            <span>Long-term Impact</span>
+          </div>
+        </div>
       </div>
-      <svg ref={svgRef} className="w-full h-full"></svg>
+      <div className="p-4">
+        <svg ref={svgRef} className="w-full h-[500px]"></svg>
+      </div>
     </div>
   )
 }

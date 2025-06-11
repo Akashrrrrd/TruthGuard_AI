@@ -11,7 +11,7 @@ import { TrendingUp, Filter, Download, Share2 } from "lucide-react"
 import { BiasTimeline } from "@/components/bias-timeline"
 import { TopicCluster } from "@/components/topic-cluster"
 import { SourceComparisonMatrix } from "@/components/source-comparison-matrix"
-import { NarrativeFlow } from "@/components/narrative-flow"
+import  NarrativeFlow  from "@/components/narrative-flow"
 import { MediaBubbleChart } from "@/components/media-bubble-chart"
 
 export default function TrendsPage() {
